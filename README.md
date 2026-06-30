@@ -22,10 +22,6 @@
 | Broker | `Redis` | `docker compose exec airflow-scheduler airflow config get-value celery broker_url` |
 | Broker URL | `redis://:@redis:6379/0` | `airflow config get-value celery broker_url` |
 
-### Краткий вывод
-
-Стенд использует `CeleryExecutor`, значит задачи Airflow выполняются не напрямую scheduler'ом, а через Celery worker. Для очереди задач используется Redis, а состояние Airflow хранится в PostgreSQL.
-
 ---
 
 ## 2. Airflow services
