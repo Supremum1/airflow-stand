@@ -34,7 +34,7 @@ docker compose ps
 
 | Service | Container | Image | Status | Ports |
 |---|---|---|---|---|
-| `airflow-apiserver` | `airflow-airflow-apiserver-1` | `apache/airflow:3.2.2` | `Up, healthy` | `0.0.0.0:8080->8080/tcp` |
+| `airflow-apiserver` | `airflow-airflow-apiserver-1` | `apache/airflow:3.2.2` | `Up, healthy` | `8080/tcp` |
 | `airflow-dag-processor` | `airflow-airflow-dag-processor-1` | `apache/airflow:3.2.2` | `Up, healthy` | `8080/tcp` |
 | `airflow-scheduler` | `airflow-airflow-scheduler-1` | `apache/airflow:3.2.2` | `Up, healthy` | `8080/tcp` |
 | `airflow-triggerer` | `airflow-airflow-triggerer-1` | `apache/airflow:3.2.2` | `Up, healthy` | `8080/tcp` |
