@@ -130,16 +130,6 @@ docker stats --no-stream
 
 В текущем Docker Compose явные индивидуальные лимиты CPU/RAM для сервисов не зафиксированы.
 
-| Компонент | CPU limit | RAM limit | Комментарий |
-|---|---:|---:|---|
-| `airflow-apiserver` | not set | not set | Используется общий лимит Docker Desktop |
-| `airflow-dag-processor` | not set | not set | Используется общий лимит Docker Desktop |
-| `airflow-scheduler` | not set | not set | Используется общий лимит Docker Desktop |
-| `airflow-triggerer` | not set | not set | Используется общий лимит Docker Desktop |
-| `airflow-worker` | not set | not set | Используется общий лимит Docker Desktop |
-| `postgres` | not set | not set | Используется общий лимит Docker Desktop |
-| `redis` | not set | not set | Используется общий лимит Docker Desktop |
-
 ### Как подтвердить лимиты
 
 Для точной проверки можно использовать:
