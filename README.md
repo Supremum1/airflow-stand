@@ -187,4 +187,250 @@ docker compose exec airflow-scheduler airflow config get-value celery worker_con
 docker stats --no-stream
 ```
 
+# Stress DAG Factory
+
+## Описание
+
+`stress_dag_factory.py` — фабрика DAG'ов для стресс-тестирования Airflow.
+Все параметры нагрузки вынесены в Airflow Variables или переменные окружения.
+
+---
+
+# Архитектура
+
+```
+                 Airflow Variables
+                        │
+                        ▼
+               get_config_value()
+                        │
+          если нет Variable
+                        │
+                        ▼
+                Environment variables
+                        │
+          если нет env-переменной
+                        │
+                        ▼
+             Значения по умолчанию
+                        │
+                        ▼
+              create_stress_dag()
+                        │
+                        ▼
+          Генерация DAG в цикле
+                        │
+                        ▼
+        globals()[dag_id] = DAG
+                        │
+                        ▼
+          Airflow обнаруживает DAG
+```
+
+---
+
+# Настраиваемые параметры
+
+| Параметр | Airflow Variable | Значение по умолчанию | Описание |
+|----------|------------------|----------------------|----------|
+| DAG_COUNT | STRESS_DAG_COUNT | 10 | Количество создаваемых DAG |
+| TASKS_PER_DAG | STRESS_TASKS_PER_DAG | 10 | Количество задач в каждом DAG |
+| TASK_DURATION | STRESS_TASK_DURATION | 5 | Продолжительность выполнения задачи (секунды) |
+| POOL_NAME | STRESS_POOL_NAME | default_pool | Airflow Pool для задач |
+| MAX_ACTIVE_RUNS | STRESS_MAX_ACTIVE_RUNS | 1 | Максимальное количество одновременно активных запусков одного DAG |
+| WORKLOAD_TYPE | STRESS_WORKLOAD_TYPE | linear | Тип структуры DAG |
+
+---
+
+# Приоритет чтения настроек
+
+Каждый параметр читается в следующем порядке:
+
+1. Airflow Variable
+2. Environment Variable
+3. Значение по умолчанию
+
+Схема работы:
+
+```
+Airflow Variable
+       │
+       ▼
+если существует
+       │
+       ▼
+использовать
+
+иначе
+
+Environment Variable
+       │
+       ▼
+если существует
+       │
+       ▼
+использовать
+
+иначе
+
+Default Value
+```
+
+---
+
+# Типы нагрузки
+
+## linear
+
+Последовательное выполнение задач.
+
+```
+task_1
+   │
+   ▼
+task_2
+   │
+   ▼
+task_3
+```
+
+Следующая задача запускается только после успешного завершения предыдущей.
+
+---
+
+## parallel
+
+Все задачи независимы.
+
+```
+task_1
+
+task_2
+
+task_3
+
+task_4
+```
+
+Scheduler может отправить все задачи на выполнение одновременно (с учётом ограничений Airflow).
+
+---
+
+## fan_out
+
+Одна задача запускает несколько последующих.
+
+```
+          ┌──► task_2
+task_1 ───┤
+          ├──► task_3
+          └──► task_4
+```
+
+После завершения `task_1` становятся доступны все downstream-задачи.
+
+---
+
+## fan_in
+
+Несколько задач сходятся в одну завершающую.
+
+```
+task_1 ───┐
+          │
+task_2 ───┼──► final_task
+          │
+task_3 ───┘
+```
+
+`final_task` будет выполнена только после успешного завершения всех upstream-зач.
+
+---
+
+# Структура DAG
+
+Каждый DAG содержит:
+
+- заданное количество задач BashOperator;
+- общие параметры (`retries`, `retry_delay`);
+- Pool;
+- schedule;
+- max_active_runs;
+- выбранную структуру зависимостей.
+
+---
+
+# Конфигурация DAG
+
+Используются следующие параметры Airflow:
+
+| Параметр | Назначение |
+|----------|------------|
+| dag_id | Уникальный идентификатор DAG |
+| start_date | Дата начала существования DAG |
+| schedule | Расписание запуска |
+| catchup | Создание пропущенных запусков |
+| max_active_runs | Максимальное число одновременно выполняющихся DAG Run |
+| default_args | Общие параметры задач |
+| tags | Теги в интерфейсе Airflow |
+
+---
+
+# Работа функции create_stress_dag()
+
+Функция создаёт один полностью настроенный DAG.
+
+Алгоритм работы:
+
+1. Создать объект DAG.
+2. Создать необходимое количество задач BashOperator.
+3. Добавить задачи в DAG.
+4. Настроить зависимости между задачами.
+5. Вернуть готовый объект DAG.
+
+---
+
+# Генерация нескольких DAG
+
+После создания функции выполняется цикл:
+
+```
+for dag_number in range(...):
+```
+
+Для каждой итерации:
+
+1. формируется уникальный `dag_id`;
+2. вызывается `create_stress_dag()`;
+3. полученный DAG регистрируется через
+
+```
+globals()[dag_id]
+```
+
+что позволяет Airflow обнаружить его при парсинге файла.
+
+---
+
+# Используемые Airflow-компоненты
+
+Во время работы задействованы:
+
+- DAG Processor — читает Python-файл и создаёт объекты DAG;
+- Scheduler — анализирует расписание и зависимости;
+- Redis (CeleryExecutor) — очередь задач;
+- Worker — выполняет задачи;
+- PostgreSQL — хранит состояние Airflow.
+
+---
+
+# Пример изменения конфигурации
+
+Через Airflow Variables:
+
+```bash
+airflow variables set STRESS_DAG_COUNT 20
+airflow variables set STRESS_TASKS_PER_DAG 50
+airflow variables set STRESS_WORKLOAD_TYPE parallel
+```
 
