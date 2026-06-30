@@ -1,0 +1,44 @@
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow version
+3.2.2
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value core executor
+CeleryExecutor
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value database sql_alchemy_conn
+postgresql+psycopg2://airflow:airflow@postgres/airflow
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value celery broker_url
+redis://:@redis:6379/0
+
+docker compose ps
+NAME                              IMAGE                  COMMAND                  SERVICE                 CREATED       STATUS                   PORTS
+airflow-airflow-apiserver-1       apache/airflow:3.2.2   "/usr/bin/dumb-init …"   airflow-apiserver       8 hours ago   Up 2 minutes (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+airflow-airflow-dag-processor-1   apache/airflow:3.2.2   "/usr/bin/dumb-init …"   airflow-dag-processor   8 hours ago   Up 2 minutes (healthy)   8080/tcp
+airflow-airflow-scheduler-1       apache/airflow:3.2.2   "/usr/bin/dumb-init …"   airflow-scheduler       8 hours ago   Up 2 minutes (healthy)   8080/tcp
+airflow-airflow-triggerer-1       apache/airflow:3.2.2   "/usr/bin/dumb-init …"   airflow-triggerer       8 hours ago   Up 2 minutes (healthy)   8080/tcp
+airflow-airflow-worker-1          apache/airflow:3.2.2   "/usr/bin/dumb-init …"   airflow-worker          8 hours ago   Up 2 minutes (healthy)   8080/tcp
+airflow-postgres-1                postgres:16            "docker-entrypoint.s…"   postgres                8 hours ago   Up 4 minutes (healthy)   5432/tcp
+airflow-redis-1                   redis:7.2-bookworm     "docker-entrypoint.s…"   redis                   8 hours ago   Up 4 minutes (healthy)   6379/tcp
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value core parallelism
+32
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value core max_active_tasks_per_dag
+16
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value core max_active_runs_per_dag
+16
+
+C:\Users\Artem\Desktop\Programs\airflow>docker compose exec airflow-scheduler airflow config get-value celery worker_concurrency
+16
+
+
+docker stats --no-stream
+CONTAINER ID   NAME                              CPU %     MEM USAGE / LIMIT     MEM %     NET I/O           BLOCK I/O        PIDS
+b2fd4b1b7c02   airflow-airflow-worker-1          0.28%     548.4MiB / 7.672GiB   6.98%     224kB / 269kB     8.19kB / 4.1kB   24
+83812ba7e046   airflow-airflow-triggerer-1       1.04%     283.1MiB / 7.672GiB   3.60%     913kB / 1.42MB    16.4kB / 0B      9
+9f0fb231a030   airflow-airflow-dag-processor-1   39.45%    351.3MiB / 7.672GiB   4.47%     18.6MB / 15.9MB   20.9MB / 0B      6
+aa48b4085ff7   airflow-airflow-apiserver-1       0.11%     252.1MiB / 7.672GiB   3.21%     364kB / 97.9kB    160kB / 0B       15
+361257015a32   airflow-airflow-scheduler-1       0.84%     208.6MiB / 7.672GiB   2.65%     3.81MB / 5.23MB   4.1kB / 0B       4
+fd450daed6ce   airflow-redis-1                   0.14%     4.379MiB / 7.672GiB   0.06%     267kB / 218kB     12.3kB / 0B      6
+1187d20497be   airflow-postgres-1                0.90%     43.57MiB / 7.672GiB   0.55%     23MB / 25.1MB     369kB / 295kB    13
