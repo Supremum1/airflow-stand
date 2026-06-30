@@ -175,6 +175,5 @@ docker compose exec airflow-scheduler airflow config get-value core max_active_r
 docker compose exec airflow-scheduler airflow config get-value celery worker_concurrency
 docker stats --no-stream
 ```
-airflow variables set STRESS_WORKLOAD_TYPE parallel
-```
+
 
