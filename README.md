@@ -155,15 +155,14 @@ docker stats --no-stream
 
 ## 7. Выводы
 
-1. Локальный Airflow-стенд успешно поднят через Docker Compose.
-2. Используется `CeleryExecutor`, поэтому в архитектуре присутствуют Redis broker и Celery worker.
-3. Metadata DB — PostgreSQL.
-4. Все основные сервисы находятся в состоянии `healthy`.
-5. Текущая worker capacity составляет 16 параллельных задач.
-6. Глобальный `parallelism = 32`, но при одном worker и `worker_concurrency = 16` фактическая пропускная способность ограничена worker'ом.
-7. Индивидуальные CPU/RAM limits для контейнеров не заданы.
-8. В текущем snapshot наиболее заметную CPU-нагрузку создаёт `airflow-dag-processor`.
-9. Для дальнейших стресс-тестов нужно отдельно наблюдать:
+1. Локальный Airflow-стенд поднят через Docker Compose.
+2. Metadata DB — PostgreSQL, брокер — Redis.
+3. Все основные сервисы находятся в состоянии `healthy`.
+4. Текущая worker capacity составляет 16 параллельных задач.
+5. Глобальный `parallelism = 32`, но при одном worker и `worker_concurrency = 16` фактическая пропускная способность ограничена worker'ом.
+6. Индивидуальные CPU/RAM limits для контейнеров не заданы.
+7. В текущем snapshot наиболее заметную CPU-нагрузку создаёт `airflow-dag-processor`.
+8. Для дальнейших стресс-тестов нужно отдельно наблюдать:
    - CPU/RAM `airflow-dag-processor`;
    - CPU/RAM `airflow-scheduler`;
    - CPU/RAM `airflow-worker`;
