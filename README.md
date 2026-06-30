@@ -26,13 +26,6 @@
 
 Стенд использует `CeleryExecutor`, значит задачи Airflow выполняются не напрямую scheduler'ом, а через Celery worker. Для очереди задач используется Redis, а состояние Airflow хранится в PostgreSQL.
 
-```text
-Scheduler -> Redis broker -> Celery Worker
-     |
-     v
-PostgreSQL metadata DB
-```
-
 ---
 
 ## 2. Airflow services
