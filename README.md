@@ -130,22 +130,6 @@ docker stats --no-stream
 
 В текущем Docker Compose явные индивидуальные лимиты CPU/RAM для сервисов не зафиксированы.
 
-### Как подтвердить лимиты
-
-Для точной проверки можно использовать:
-
-```bash
-docker inspect airflow-airflow-worker-1
-```
-
-Или коротко:
-
-```bash
-docker inspect --format "{{.Name}} CPU={{.HostConfig.NanoCpus}} MEM={{.HostConfig.Memory}}" airflow-airflow-worker-1
-```
-
-Если `CPU=0` и `MEM=0`, значит индивидуальные лимиты контейнера не заданы.
-
 ---
 
 ## 6. Итоговый baseline
@@ -180,7 +164,7 @@ docker inspect --format "{{.Name}} CPU={{.HostConfig.NanoCpus}} MEM={{.HostConfi
 2. Используется `CeleryExecutor`, поэтому в архитектуре присутствуют Redis broker и Celery worker.
 3. Metadata DB — PostgreSQL.
 4. Все основные сервисы находятся в состоянии `healthy`.
-5. Текущая потенциальная worker capacity составляет 16 параллельных задач.
+5. Текущая worker capacity составляет 16 параллельных задач.
 6. Глобальный `parallelism = 32`, но при одном worker и `worker_concurrency = 16` фактическая пропускная способность ограничена worker'ом.
 7. Индивидуальные CPU/RAM limits для контейнеров не заданы.
 8. В текущем snapshot наиболее заметную CPU-нагрузку создаёт `airflow-dag-processor`.
@@ -209,15 +193,4 @@ docker compose exec airflow-scheduler airflow config get-value celery worker_con
 docker stats --no-stream
 ```
 
----
 
-## 9. Что можно улучшить на следующем этапе
-
-На следующем этапе можно подготовить стресс-набор DAG'ов и сравнить метрики до/после изменения настроек:
-
-- увеличить/уменьшить `worker_concurrency`;
-- изменить `parallelism`;
-- добавить pools;
-- задать CPU/RAM limits для worker/scheduler/dag-processor;
-- измерить влияние количества DAG'ов на `airflow-dag-processor`;
-- отдельно замерить нагрузку PostgreSQL и Redis.
